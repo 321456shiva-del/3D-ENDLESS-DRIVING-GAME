@@ -1,9 +1,9 @@
-// BASIC CHECK – confirms JS is running
-console.log("script.js loaded");
+// CONFIRM JS IS RUNNING
+console.log("Three.js running");
 
 // SCENE
 const scene = new THREE.Scene();
-scene.background = new THREE.Color(0x87ceeb); // blue sky
+scene.background = new THREE.Color(0x87ceeb);
 
 // CAMERA
 const camera = new THREE.PerspectiveCamera(
@@ -12,7 +12,7 @@ const camera = new THREE.PerspectiveCamera(
   0.1,
   1000
 );
-camera.position.set(0, 5, 10);
+camera.position.set(0, 2, 5);
 
 // RENDERER
 const renderer = new THREE.WebGLRenderer({ antialias: true });
@@ -20,74 +20,35 @@ renderer.setSize(window.innerWidth, window.innerHeight);
 document.body.appendChild(renderer.domElement);
 
 // LIGHTS
-const sunlight = new THREE.DirectionalLight(0xffffff, 1);
-sunlight.position.set(10, 20, 10);
-scene.add(sunlight);
+scene.add(new THREE.AmbientLight(0xffffff, 0.8));
 
-const ambient = new THREE.AmbientLight(0xffffff, 0.6);
-scene.add(ambient);
+const sun = new THREE.DirectionalLight(0xffffff, 1);
+sun.position.set(5, 10, 5);
+scene.add(sun);
 
-// GROUND / ROAD
-const groundGeometry = new THREE.PlaneGeometry(2000, 2000);
-const groundMaterial = new THREE.MeshStandardMaterial({ color: 0x444444 });
-const ground = new THREE.Mesh(groundGeometry, groundMaterial);
+// GROUND (VISIBLE)
+const ground = new THREE.Mesh(
+  new THREE.PlaneGeometry(50, 50),
+  new THREE.MeshStandardMaterial({ color: 0x555555 })
+);
 ground.rotation.x = -Math.PI / 2;
 scene.add(ground);
 
-// CAR MODEL
-let car = null;
-const loader = new THREE.GLTFLoader();
-
-loader.load(
-  "https://raw.githubusercontent.com/KhronosGroup/glTF-Sample-Models/master/2.0/VC/glTF-Binary/VC.glb",
-  function (gltf) {
-    car = gltf.scene;
-    car.scale.set(0.5, 0.5, 0.5);
-    scene.add(car);
-  },
-  undefined,
-  function (error) {
-    console.error("GLB failed to load", error);
-  }
+// 🔴 TEST CUBE (YOU SHOULD SEE THIS)
+const cube = new THREE.Mesh(
+  new THREE.BoxGeometry(1, 1, 1),
+  new THREE.MeshStandardMaterial({ color: 0xff0000 })
 );
+cube.position.y = 0.5;
+scene.add(cube);
 
-// CONTROLS
-let speed = 0;
-let turn = 0;
+// CAMERA LOOK
+camera.lookAt(0, 0, 0);
 
-document.addEventListener("keydown", (e) => {
-  if (e.key === "w" || e.key === "ArrowUp") speed = 0.25;
-  if (e.key === "s" || e.key === "ArrowDown") speed = -0.15;
-  if (e.key === "a" || e.key === "ArrowLeft") turn = 0.05;
-  if (e.key === "d" || e.key === "ArrowRight") turn = -0.05;
-});
-
-document.addEventListener("keyup", () => {
-  speed = 0;
-  turn = 0;
-});
-
-// RESIZE HANDLER
-window.addEventListener("resize", () => {
-  camera.aspect = window.innerWidth / window.innerHeight;
-  camera.updateProjectionMatrix();
-  renderer.setSize(window.innerWidth, window.innerHeight);
-});
-
-// ANIMATION LOOP
+// RENDER LOOP
 function animate() {
   requestAnimationFrame(animate);
-
-  if (car) {
-    car.rotation.y += turn;
-    car.position.x += Math.sin(car.rotation.y) * speed;
-    car.position.z += Math.cos(car.rotation.y) * speed;
-
-    camera.position.x = car.position.x;
-    camera.position.z = car.position.z + 10;
-    camera.lookAt(car.position);
-  }
-
+  cube.rotation.y += 0.01;
   renderer.render(scene, camera);
 }
 
